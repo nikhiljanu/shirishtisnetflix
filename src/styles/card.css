@@ -1,0 +1,403 @@
+/* ==========================================================================
+   MOVIE CARD STYLES
+   ========================================================================== */
+
+.movie-card-root {
+  position: relative;
+  flex: 0 0 calc((100% - 60px) / 6);
+  min-width: 200px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+@media (max-width: 1400px) {
+  .movie-card-root {
+    flex: 0 0 calc((100% - 48px) / 5);
+    min-width: 190px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .movie-card-root {
+    flex: 0 0 calc((100% - 36px) / 4);
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 800px) {
+  .movie-card-root {
+    flex: 0 0 calc((100% - 24px) / 3);
+    min-width: 150px;
+  }
+}
+
+.card-base-thumbnail {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: var(--bg-card);
+  transition: transform var(--anim-fast);
+}
+
+.card-poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--anim-fast);
+}
+
+/* Badges */
+.card-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 6px;
+  border-radius: 2px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+.red-badge {
+  background-color: var(--netflix-red);
+  color: #fff;
+}
+
+.badge-top10 {
+  background-color: #E50914;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Expanded Card Preview on Hover */
+.card-hover-preview {
+  position: absolute;
+  top: -40px;
+  left: -20px;
+  width: calc(100% + 40px);
+  background-color: var(--bg-card);
+  border-radius: 6px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.9);
+  z-index: 50;
+  overflow: hidden;
+  transform-origin: center center;
+  animation: cardExpand 0.28s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+
+@keyframes cardExpand {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.hover-preview-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.hover-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hover-media-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40%;
+  background: linear-gradient(180deg, transparent, rgba(24, 24, 24, 0.85));
+}
+
+.hover-title-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.hover-preview-body {
+  padding: 12px 14px 14px;
+}
+
+.hover-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.action-group-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.round-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(42, 42, 42, 0.6);
+  color: #fff;
+  transition: all var(--anim-fast);
+}
+
+.round-btn:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.08);
+}
+
+.round-btn.play-btn {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+.round-btn.play-btn:hover {
+  background-color: #e6e6e6;
+}
+
+.round-btn.list-btn.in-list {
+  border-color: var(--netflix-red);
+  color: var(--netflix-red);
+}
+
+.round-btn.thumbs-btn.liked {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+/* Quick Metadata */
+.hover-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  margin-bottom: 8px;
+}
+
+.match-score {
+  color: var(--accent-green);
+  font-weight: 700;
+}
+
+.maturity-tag {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0 4px;
+  border-radius: 2px;
+  color: #ccc;
+  font-size: 0.7rem;
+}
+
+.duration-tag {
+  color: #a3a3a3;
+}
+
+.hd-tag {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0 3px;
+  border-radius: 2px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #aaa;
+}
+
+.hover-genres-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #fff;
+}
+
+.genre-dot {
+  color: #666;
+  font-size: 0.7rem;
+}
+
+/* Continue Watching Card */
+.cw-card-container {
+  flex: 0 0 calc((100% - 48px) / 4);
+  min-width: 220px;
+  background-color: var(--bg-card);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--anim-fast);
+}
+
+.cw-card-container:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.cw-thumbnail-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.cw-thumbnail-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cw-play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity var(--anim-fast);
+}
+
+.cw-thumbnail-box:hover .cw-play-overlay {
+  opacity: 1;
+}
+
+.cw-play-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 3px;
+}
+
+.cw-progress-bar-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.cw-progress-bar-fill {
+  height: 100%;
+  background: var(--netflix-red);
+}
+
+.cw-bottom-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #232323;
+}
+
+.cw-text-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cw-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.cw-time-left {
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+.cw-info-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ccc;
+  transition: all var(--anim-fast);
+}
+
+.cw-info-btn:hover {
+  border-color: #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Top 10 in India Card */
+.top10-card-wrapper {
+  flex: 0 0 calc((100% - 60px) / 5);
+  min-width: 210px;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+  cursor: pointer;
+  transition: transform var(--anim-fast);
+}
+
+.top10-card-wrapper:hover {
+  transform: scale(1.05);
+}
+
+.top10-rank-number {
+  font-family: var(--font-display);
+  font-size: 14rem;
+  font-weight: 900;
+  line-height: 0.8;
+  color: #000000;
+  -webkit-text-stroke: 4px #595959;
+  letter-spacing: -14px;
+  user-select: none;
+  z-index: 1;
+  position: relative;
+  margin-right: -25px;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.top10-poster-container {
+  position: relative;
+  width: 140px;
+  height: 200px;
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 2;
+  box-shadow: var(--shadow-md);
+  background: var(--bg-card);
+}
+
+.top10-poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
