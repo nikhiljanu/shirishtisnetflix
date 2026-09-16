@@ -9,4 +9,5 @@ export const env = {
   isProduction: process.env.NODE_ENV === 'production',
   port: Number(process.env.PORT) || 5000,
   allowedOrigins,
+  publicApiUrl: process.env.PUBLIC_API_URL || 'https://shirishtisnetflix.onrender.com',
 };

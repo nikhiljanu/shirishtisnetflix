@@ -11,7 +11,6 @@ jobs:
     steps:
       - name: Ping the health endpoint
         env:
-          RENDER_BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL }}
+          RENDER_BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL || 'https://shirishtisnetflix.onrender.com' }}
         run: |
-          test -n "$RENDER_BACKEND_URL" || { echo "Set the RENDER_BACKEND_URL repository secret first."; exit 1; }
           curl --fail --silent --show-error --retry 2 "$RENDER_BACKEND_URL/api/health"

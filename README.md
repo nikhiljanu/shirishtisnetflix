@@ -16,6 +16,8 @@ The currently available route is `GET /api/health`. Video routes (`GET /api/vide
 
 After the Render deployment, set `RENDER_BACKEND_URL` as a GitHub repository secret. The included Actions workflow calls its `/api/health` endpoint every ten minutes.
 
+For the Vercel frontend, set `VITE_API_URL` to `https://shirishtisnetflix.onrender.com` (without a trailing slash). A local `.env` and a shareable `.env.example` are included; only the public API URL belongs in this frontend variable. In Render, set `FRONTEND_URL` to the exact deployed Vercel domain once it is available—this is required for production CORS.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:
