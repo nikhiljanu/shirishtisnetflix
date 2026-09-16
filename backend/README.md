@@ -13,11 +13,11 @@ The service runs at `http://localhost:5000` by default.
 ## Routes
 
 - `GET /api/health` returns service health information. Use this endpoint for Render and an uptime monitor.
-- `GET /api/videos` is reserved for the Cloudinary video list.
-- `GET /api/videos/:videoId` is reserved for an individual Cloudinary video.
+- `GET /api/videos?limit=25&cursor=...` lists Cloudinary upload videos.
+- `GET /api/videos/:videoId` returns an individual Cloudinary video.
 
-The video routes intentionally return `503` until Cloudinary credentials and the chosen video metadata/public-ID format are supplied. Do not expose `CLOUDINARY_API_SECRET` to Vercel or to browser code.
+The video routes return `503` until `CLOUDINARY_URL` is configured. Do not expose Cloudinary credentials to Vercel or browser code.
 
 ## Render
 
-The repository-root `render.yaml` deploys this directory as the Render web service. On Render, set `FRONTEND_URL` to the Vercel production URL and add the three `CLOUDINARY_*` values later through Render environment variables.
+The repository-root `render.yaml` deploys this directory as the Render web service. On Render, set `FRONTEND_URL` to the Vercel production URL and add `CLOUDINARY_URL` as a secret environment variable.

@@ -7,5 +7,5 @@ export function errorHandler(error, _request, response, _next) {
   if (error.message === 'Origin is not allowed by CORS') {
     return response.status(403).json({ error: 'Origin is not allowed' });
   }
-  response.status(500).json({ error: 'Internal server error' });
+  response.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Internal server error' });
 }
