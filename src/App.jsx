@@ -8,10 +8,10 @@ import SearchResults from './components/SearchResults';
 import Footer from './components/Footer';
 
 import { 
-  HERO_FEATURED, 
-  FRIENDS_SHOW, 
-  MOVIE_CATEGORIES, 
-  ALL_MEDIA 
+  HERO_FEATURED,
+  FRIENDS_SHOW,
+  MOVIE_CATEGORIES,
+  ALL_MEDIA
 } from './data/moviesData';
 
 export default function App() {
@@ -19,7 +19,6 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [modalItem, setModalItem] = useState(null);
   const [playingItem, setPlayingItem] = useState(null);
-
   // My List persistence in localStorage
   const [myList, setMyList] = useState(() => {
     try {

@@ -1,5 +1,21 @@
 # React + Vite
 
+## Backend API and deployment
+
+The Vite frontend is deployed to Vercel. Its standalone Express API is in the [`backend`](./backend) folder and is deployed to Render using the repository-root `render.yaml`.
+
+To run the API locally, use a separate terminal:
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+The currently available route is `GET /api/health`. Video routes (`GET /api/videos` and `GET /api/videos/:videoId`) are prepared for Cloudinary and intentionally return `503` until Cloudinary credentials and video public IDs are configured. See [`backend/README.md`](./backend/README.md) for setup details.
+
+After the Render deployment, set `RENDER_BACKEND_URL` as a GitHub repository secret. The included Actions workflow calls its `/api/health` endpoint every ten minutes.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:
