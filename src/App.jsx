@@ -1,192 +1,92 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import HeroBanner from './components/HeroBanner';
-import ContentRow from './components/ContentRow';
-import DetailModal from './components/DetailModal';
+import { useEffect, useMemo, useState } from 'react';
+import { Play, RefreshCw, Search, X } from 'lucide-react';
 import VideoPlayer from './components/VideoPlayer';
-import SearchResults from './components/SearchResults';
-import Footer from './components/Footer';
-
-import { 
-  HERO_FEATURED,
-  FRIENDS_SHOW,
-  MOVIE_CATEGORIES,
-  ALL_MEDIA
-} from './data/moviesData';
+import { apiUrl } from './config/api';
+import './styles/catalog.css';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [modalItem, setModalItem] = useState(null);
-  const [playingItem, setPlayingItem] = useState(null);
-  // My List persistence in localStorage
-  const [myList, setMyList] = useState(() => {
+  const [videos, setVideos] = useState([]);
+  const [query, setQuery] = useState('');
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [status, setStatus] = useState('loading');
+
+  const loadVideos = async ({ showLoading = true } = {}) => {
+    if (showLoading) setStatus('loading');
     try {
-      const saved = localStorage.getItem('netflix_my_list');
-      return saved ? JSON.parse(saved) : [HERO_FEATURED, FRIENDS_SHOW];
-    } catch {
-      return [HERO_FEATURED, FRIENDS_SHOW];
+      const response = await fetch(apiUrl('/api/videos?limit=100'));
+      if (!response.ok) throw new Error('Unable to load videos');
+      const result = await response.json();
+      setVideos(result.data || []);
+      setStatus('ready');
+    } catch (requestError) {
+      console.error('Video library request failed:', requestError);
+      setStatus('error');
     }
-  });
+  };
 
   useEffect(() => {
-    try {
-      localStorage.setItem('netflix_my_list', JSON.stringify(myList));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [myList]);
+    const requestTimer = window.setTimeout(() => loadVideos({ showLoading: false }), 0);
+    return () => window.clearTimeout(requestTimer);
+  }, []);
 
-  const handleToggleMyList = (movie) => {
-    setMyList((prev) => {
-      const exists = prev.some((item) => item.id === movie.id);
-      if (exists) {
-        return prev.filter((item) => item.id !== movie.id);
-      } else {
-        return [...prev, movie];
-      }
-    });
-  };
+  const visibleVideos = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return videos;
+    return videos.filter((video) => video.publicId.toLowerCase().includes(normalizedQuery));
+  }, [query, videos]);
 
-  const handleResetHome = () => {
-    setActiveTab('home');
-    setSearchQuery('');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Open modal with deep copy or full data (e.g. if Friends is clicked, enrich with FRIENDS_SHOW episodes)
-  const handleOpenModal = (item) => {
-    if (item.id === 'friends' || item.id === 'friends-bb') {
-      setModalItem(FRIENDS_SHOW);
-    } else if (item.id === HERO_FEATURED.id) {
-      setModalItem(HERO_FEATURED);
-    } else {
-      // Find matching item or enriched data
-      const enriched = ALL_MEDIA.find((m) => m.id === item.id) || item;
-      setModalItem(enriched);
-    }
-  };
-
-  const handlePlay = (item) => {
-    setPlayingItem(item);
-  };
-
-  // Filter items based on active search
-  const filteredSearchItems = searchQuery.trim()
-    ? ALL_MEDIA.filter((item) => {
-        const q = searchQuery.toLowerCase();
-        const titleMatch = item.title?.toLowerCase().includes(q);
-        const genreMatch = item.genres?.some((g) => g.toLowerCase().includes(q));
-        const castMatch = item.cast?.some((c) => c.toLowerCase().includes(q));
-        return titleMatch || genreMatch || castMatch;
-      })
-    : [];
-
-  // Filter categories by tab
-  const getDisplayCategories = () => {
-    if (activeTab === 'tv') {
-      return MOVIE_CATEGORIES.filter((cat) => 
-        cat.id === 'international-tv-shows' ||
-        cat.id === 'critically-acclaimed' ||
-        cat.id === 'tv-dramas' ||
-        cat.id === 'crime-tv-shows' ||
-        cat.id === 'k-dramas'
-      );
-    }
-    if (activeTab === 'movies') {
-      return MOVIE_CATEGORIES.filter((cat) => 
-        cat.id === 'we-think-youll-love-these' ||
-        cat.id === 'made-in-india' ||
-        cat.id === 'top-10-india'
-      );
-    }
-    if (activeTab === 'popular') {
-      return MOVIE_CATEGORIES.filter((cat) => 
-        cat.id === 'top-10-india' ||
-        cat.id === 'critically-acclaimed' ||
-        cat.id === 'we-think-youll-love-these'
-      );
-    }
-    return MOVIE_CATEGORIES;
-  };
+  const displayTitle = (video) => video.publicId.split('/').at(-1);
+  const heroVideo = visibleVideos[0] || videos[0];
 
   return (
-    <div className="app-container">
-      {/* Fixed Navigation Bar */}
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        myListCount={myList.length}
-        onResetHome={handleResetHome}
-      />
+    <main className="video-library">
+      <header className="library-header">
+        <button className="library-brand" onClick={() => { setQuery(''); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+          SHRISHTI'S
+        </button>
+        <label className="library-search">
+          <Search size={18} aria-hidden="true" />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search titles" aria-label="Search titles" />
+          {query && <button onClick={() => setQuery('')} aria-label="Clear search"><X size={16} /></button>}
+        </label>
+      </header>
 
-      {/* Main Content Area */}
-      {searchQuery.trim() ? (
-        <SearchResults
-          title={`Results for "${searchQuery}"`}
-          items={filteredSearchItems}
-          onPlay={handlePlay}
-          onOpenModal={handleOpenModal}
-          myList={myList}
-          onToggleMyList={handleToggleMyList}
-        />
-      ) : activeTab === 'my-list' ? (
-        <SearchResults
-          title="My List"
-          items={myList}
-          onPlay={handlePlay}
-          onOpenModal={handleOpenModal}
-          myList={myList}
-          onToggleMyList={handleToggleMyList}
-        />
-      ) : (
-        <>
-          {/* Cinematic Hero Banner (Figma Frame 1) */}
-          <HeroBanner
-            movie={HERO_FEATURED}
-            onPlay={handlePlay}
-            onOpenModal={handleOpenModal}
-          />
+      {status === 'loading' && <div className="library-state">Loading videos…</div>}
+      {status === 'error' && (
+        <div className="library-state library-error">
+          <p>Videos could not be loaded.</p>
+          <button onClick={loadVideos}><RefreshCw size={17} /> Retry</button>
+        </div>
+      )}
+      {status === 'ready' && videos.length === 0 && <div className="library-state">No videos have been uploaded yet.</div>}
 
-          {/* Row Sections & Carousels */}
-          <div className="main-content">
-            {getDisplayCategories().map((category) => (
-              <ContentRow
-                key={category.id}
-                category={category}
-                onPlay={handlePlay}
-                onOpenModal={handleOpenModal}
-                myList={myList}
-                onToggleMyList={handleToggleMyList}
-              />
-            ))}
+      {status === 'ready' && heroVideo && (
+        <section className="library-feature" style={{ '--feature-image': `url("${heroVideo.thumbnailUrl}")` }}>
+          <div className="feature-shade" />
+          <div className="feature-content">
+            <h1>{displayTitle(heroVideo)}</h1>
+            <button className="play-feature" onClick={() => setSelectedVideo(heroVideo)}><Play size={20} fill="currentColor" /> Play</button>
           </div>
-        </>
+        </section>
       )}
 
-      {/* Detail Modal (Figma Frames 2 & 3) */}
-      {modalItem && (
-        <DetailModal
-          item={modalItem}
-          onClose={() => setModalItem(null)}
-          onPlay={handlePlay}
-          isInMyList={myList.some((m) => m.id === modalItem.id)}
-          onToggleMyList={handleToggleMyList}
-        />
+      {status === 'ready' && visibleVideos.length > 0 && (
+        <section className="library-grid" aria-label="Video library">
+          {visibleVideos.map((video) => (
+            <article className="video-tile" key={video.publicId}>
+              <button className="video-tile-media" onClick={() => setSelectedVideo(video)} aria-label={`Play ${displayTitle(video)}`}>
+                <img src={video.thumbnailUrl} alt="" loading="lazy" />
+                <span className="tile-play"><Play size={18} fill="currentColor" /></span>
+              </button>
+              <h2>{displayTitle(video)}</h2>
+            </article>
+          ))}
+        </section>
       )}
 
-      {/* Interactive Video Player Overlay */}
-      {playingItem && (
-        <VideoPlayer
-          item={playingItem}
-          onClose={() => setPlayingItem(null)}
-        />
-      )}
+      {status === 'ready' && videos.length > 0 && visibleVideos.length === 0 && <div className="library-state">No matching titles.</div>}
 
-      {/* Footer */}
-      <Footer />
-    </div>
+      {selectedVideo && <VideoPlayer video={selectedVideo} title={displayTitle(selectedVideo)} onClose={() => setSelectedVideo(null)} />}
+    </main>
   );
 }

@@ -1,0 +1,90 @@
+.video-library {
+  min-height: 100vh;
+  background: #0d0d0d;
+  color: #fff;
+  padding-bottom: 5rem;
+}
+
+.library-header {
+  height: 74px;
+  padding: 0 4vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgba(13, 13, 13, .94);
+  border-bottom: 1px solid rgba(255, 255, 255, .09);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.library-brand, .library-search button, .video-tile-media, .play-feature, .cloud-player-bar button {
+  border: 0;
+  cursor: pointer;
+}
+
+.library-brand {
+  padding: 0;
+  background: none;
+  color: #e50914;
+  font: 800 1.25rem/1 var(--font-base);
+  letter-spacing: -.04em;
+}
+
+.library-search {
+  max-width: 320px;
+  width: 42vw;
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding: .55rem .75rem;
+  background: #171717;
+  border: 1px solid #363636;
+  color: #aaa;
+}
+
+.library-search:focus-within { border-color: #fff; }
+.library-search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: #fff; font: inherit; }
+.library-search button { display: grid; place-items: center; padding: 0; color: #aaa; background: transparent; }
+
+.library-feature {
+  position: relative;
+  min-height: min(56vw, 640px);
+  display: flex;
+  align-items: end;
+  padding: 8vw 4vw;
+  background: center / cover no-repeat var(--feature-image);
+}
+
+.feature-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.86), rgba(0,0,0,.22) 66%), linear-gradient(0deg, #0d0d0d, transparent 42%); }
+.feature-content { position: relative; max-width: 42rem; }
+.feature-content h1 { margin: 0 0 1rem; font-size: clamp(2.6rem, 7vw, 6rem); line-height: .94; letter-spacing: -.04em; overflow-wrap: anywhere; }
+.play-feature { display: inline-flex; align-items: center; gap: .55rem; padding: .75rem 1.1rem; background: #fff; color: #0d0d0d; font-weight: 800; font-size: 1rem; }
+.play-feature:hover { background: #e6e6e6; }
+
+.library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.4rem .85rem; padding: 2.5rem 4vw; }
+.video-tile { min-width: 0; }
+.video-tile-media { width: 100%; aspect-ratio: 16 / 9; display: grid; place-items: center; overflow: hidden; position: relative; background: #202020; }
+.video-tile-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s cubic-bezier(.22, 1, .36, 1); }
+.video-tile-media:hover img, .video-tile-media:focus-visible img { transform: scale(1.05); }
+.tile-play { position: absolute; display: grid; place-items: center; width: 2.6rem; height: 2.6rem; color: #111; background: #fff; border-radius: 50%; opacity: 0; transform: scale(.85); transition: .2s ease; }
+.video-tile-media:hover .tile-play, .video-tile-media:focus-visible .tile-play { opacity: 1; transform: scale(1); }
+.video-tile h2 { margin: .65rem 0 0; font-size: .95rem; font-weight: 650; overflow-wrap: anywhere; }
+.library-state { min-height: 55vh; display: grid; place-content: center; text-align: center; color: #bbb; padding: 2rem; }
+.library-error p { margin-bottom: 1rem; color: #fff; }
+.library-error button { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .65rem .85rem; background: #fff; color: #111; border: 0; cursor: pointer; font-weight: 700; }
+
+.cloud-player { position: fixed; inset: 0; z-index: 100; display: grid; grid-template-rows: auto 1fr; background: #000; }
+.cloud-player-bar { min-height: 64px; padding: 0 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: #fff; background: #111; }
+.cloud-player-bar h2 { min-width: 0; margin: 0; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cloud-player-bar button { display: grid; place-items: center; padding: .5rem; background: transparent; color: #fff; }
+.cloud-player-video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+
+@media (max-width: 620px) {
+  .library-header { height: 62px; }
+  .library-brand { font-size: 1rem; }
+  .library-search { width: 52vw; }
+  .library-feature { min-height: 70vw; }
+  .library-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem .65rem; }
+}
