@@ -1,17 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Play, RefreshCw, Search, X } from 'lucide-react';
-import VideoPlayer from './components/VideoPlayer';
+import { useEffect, useState } from 'react';
 import { apiUrl } from './config/api';
-import './styles/catalog.css';
+import TopNav from './components/TopNav';
+import HeroBillboard from './components/HeroBillboard';
+import CarouselRow from './components/CarouselRow';
+import DetailsOverlay from './components/DetailsOverlay';
+import CinematicPlayer from './components/CinematicPlayer';
 
 export default function App() {
   const [videos, setVideos] = useState([]);
-  const [query, setQuery] = useState('');
-  const [selectedVideo, setSelectedVideo] = useState(null);
   const [status, setStatus] = useState('loading');
+  const [activeMenu, setActiveMenu] = useState('Home');
+  
+  const [modalVideo, setModalVideo] = useState(null);
+  const [playingVideo, setPlayingVideo] = useState(null);
 
-  const loadVideos = async ({ showLoading = true } = {}) => {
-    if (showLoading) setStatus('loading');
+  const loadVideos = async () => {
+    setStatus('loading');
     try {
       const response = await fetch(apiUrl('/api/videos?limit=100'));
       if (!response.ok) throw new Error('Unable to load videos');
@@ -25,68 +29,100 @@ export default function App() {
   };
 
   useEffect(() => {
-    const requestTimer = window.setTimeout(() => loadVideos({ showLoading: false }), 0);
-    return () => window.clearTimeout(requestTimer);
+    loadVideos();
   }, []);
 
-  const visibleVideos = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) return videos;
-    return videos.filter((video) => video.publicId.toLowerCase().includes(normalizedQuery));
-  }, [query, videos]);
+  if (status === 'loading') {
+    return <div style={{ height: '100vh', display: 'grid', placeItems: 'center', background: '#141414', color: 'white' }}>Loading...</div>;
+  }
+  
+  if (status === 'error' || videos.length === 0) {
+    return (
+      <div style={{ height: '100vh', display: 'grid', placeItems: 'center', background: '#141414', color: 'white' }}>
+        <h2>No videos found</h2>
+        <button onClick={loadVideos} style={{ padding: '10px 20px', background: 'white', color: 'black', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>Retry</button>
+      </div>
+    );
+  }
 
-  const displayTitle = (video) => video.publicId.split('/').at(-1);
-  const heroVideo = visibleVideos[0] || videos[0];
+  // Duplicate arrays to fill the carousels if there are very few videos
+  const generateRowData = (seedList, multiplier = 1) => {
+    let result = [];
+    for(let i=0; i<multiplier; i++) {
+      result = [...result, ...seedList];
+    }
+    return result;
+  };
+
+  const heroVideo = videos[0];
+  
+  // Create the requested rows: 2 movie rows, 1 webseries row (using same video as 5 episodes in the modal)
+  const popularMovies = generateRowData(videos, Math.ceil(8 / videos.length)).slice(0, 8);
+  const top10Movies = generateRowData([...videos].reverse(), Math.ceil(10 / videos.length)).slice(0, 10);
+  const trendingSeries = generateRowData(videos, Math.ceil(8 / videos.length)).slice(0, 8);
+
+  const handlePlay = (video) => {
+    setPlayingVideo(video);
+  };
+
+  const handleMoreInfo = (video) => {
+    setModalVideo(video);
+  };
+
+  const closeModals = () => {
+    setModalVideo(null);
+  };
 
   return (
-    <main className="video-library">
-      <header className="library-header">
-        <button className="library-brand" onClick={() => { setQuery(''); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-          SHRISHTI'S
-        </button>
-        <label className="library-search">
-          <Search size={18} aria-hidden="true" />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search titles" aria-label="Search titles" />
-          {query && <button onClick={() => setQuery('')} aria-label="Clear search"><X size={16} /></button>}
-        </label>
-      </header>
+    <>
+      <TopNav activeMenu={activeMenu} />
+      
+      <HeroBillboard 
+        video={heroVideo} 
+        onPlay={handlePlay} 
+        onMoreInfo={handleMoreInfo} 
+      />
+      
+      <div style={{ marginTop: '1rem', paddingBottom: '4rem' }}>
+        <CarouselRow 
+          title="Top 10 Movies Today" 
+          videos={top10Movies} 
+          isTop10={true}
+          onPlay={handlePlay}
+          onMoreInfo={handleMoreInfo}
+        />
+        
+        <CarouselRow 
+          title="Continue Watching for User" 
+          videos={popularMovies} 
+          isContinueWatching={true}
+          onPlay={handlePlay}
+          onMoreInfo={handleMoreInfo}
+        />
 
-      {status === 'loading' && <div className="library-state">Loading videos…</div>}
-      {status === 'error' && (
-        <div className="library-state library-error">
-          <p>Videos could not be loaded.</p>
-          <button onClick={loadVideos}><RefreshCw size={17} /> Retry</button>
-        </div>
-      )}
-      {status === 'ready' && videos.length === 0 && <div className="library-state">No videos have been uploaded yet.</div>}
+        <CarouselRow 
+          title="Trending Web Series" 
+          videos={trendingSeries} 
+          onPlay={handlePlay}
+          onMoreInfo={handleMoreInfo}
+        />
+      </div>
 
-      {status === 'ready' && heroVideo && (
-        <section className="library-feature" style={{ '--feature-image': `url("${heroVideo.thumbnailUrl}")` }}>
-          <div className="feature-shade" />
-          <div className="feature-content">
-            <h1>{displayTitle(heroVideo)}</h1>
-            <button className="play-feature" onClick={() => setSelectedVideo(heroVideo)}><Play size={20} fill="currentColor" /> Play</button>
-          </div>
-        </section>
-      )}
-
-      {status === 'ready' && visibleVideos.length > 0 && (
-        <section className="library-grid" aria-label="Video library">
-          {visibleVideos.map((video) => (
-            <article className="video-tile" key={video.publicId}>
-              <button className="video-tile-media" onClick={() => setSelectedVideo(video)} aria-label={`Play ${displayTitle(video)}`}>
-                <img src={video.thumbnailUrl} alt="" loading="lazy" />
-                <span className="tile-play"><Play size={18} fill="currentColor" /></span>
-              </button>
-              <h2>{displayTitle(video)}</h2>
-            </article>
-          ))}
-        </section>
+      {modalVideo && (
+        <DetailsOverlay 
+          video={modalVideo} 
+          allVideos={videos} // Pass all videos to act as dummy episodes for the webseries
+          onClose={closeModals} 
+          onPlay={handlePlay} 
+        />
       )}
 
-      {status === 'ready' && videos.length > 0 && visibleVideos.length === 0 && <div className="library-state">No matching titles.</div>}
-
-      {selectedVideo && <VideoPlayer video={selectedVideo} title={displayTitle(selectedVideo)} onClose={() => setSelectedVideo(null)} />}
-    </main>
+      {playingVideo && (
+        <CinematicPlayer 
+          video={playingVideo} 
+          onClose={() => setPlayingVideo(null)} 
+        />
+      )}
+    </>
   );
 }
