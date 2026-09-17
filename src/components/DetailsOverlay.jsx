@@ -1,10 +1,23 @@
-import { Play, Plus, ThumbsUp, X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Play, Plus, Check, ThumbsUp, X, Volume2, VolumeX } from 'lucide-react';
 import '../styles/figma-ui.css';
 
-export default function DetailsOverlay({ video, allVideos, onClose, onPlay }) {
+export default function DetailsOverlay({ video, allVideos, onClose, onPlay, myList = [], onToggleMyList }) {
   if (!video) return null;
 
-  const displayTitle = video.publicId.split('/').pop().replace(/-/g, ' ');
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef(null);
+  const rawTitle = video.publicId.split('/').pop().replace(/-/g, ' ').replace(/_/g, ' ');
+  const displayTitle = rawTitle.toLowerCase().startsWith('img') ? 'Diwali Diaries' : rawTitle;
+  const isBookmarked = myList.some(item => item.publicId === video.publicId);
+
+  const handleToggleMute = (e) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
 
   // Dummy episodes using allVideos to fill space
   const episodes = allVideos ? allVideos.slice(0, 5) : [video, video, video, video, video];
@@ -12,22 +25,49 @@ export default function DetailsOverlay({ video, allVideos, onClose, onPlay }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>
-          <X size={24} />
+        <button className="modal-close" onClick={onClose} aria-label="Close">
+          <X size={20} />
         </button>
 
         <div className="modal-banner">
-          <img src={video.thumbnailUrl} alt={displayTitle} />
+          {video.secureUrl ? (
+            <video 
+              ref={videoRef}
+              src={video.secureUrl} 
+              poster={video.thumbnailUrl}
+              autoPlay 
+              muted={isMuted}
+              loop 
+              playsInline 
+              className="modal-banner-media"
+            />
+          ) : (
+            <img src={video.thumbnailUrl} alt={displayTitle} className="modal-banner-media" />
+          )}
           <div className="modal-banner-vignette"></div>
           
           <div className="modal-banner-content">
             <h1 className="modal-banner-title">{displayTitle}</h1>
             <div className="modal-actions">
               <button className="btn-play" onClick={() => onPlay(video)}>
-                <Play size={24} fill="black" /> Play
+                <Play size={22} fill="black" stroke="black" /> Play
               </button>
-              <button className="btn-round"><Plus size={24} /></button>
-              <button className="btn-round"><ThumbsUp size={20} /></button>
+              <button 
+                className="btn-round" 
+                onClick={() => onToggleMyList?.(video)} 
+                title={isBookmarked ? "Remove from My List" : "Add to My List"}
+              >
+                {isBookmarked ? <Check size={20} color="#46d369" /> : <Plus size={22} strokeWidth={2.5} />}
+              </button>
+              <button className="btn-round" title="Rate"><ThumbsUp size={18} strokeWidth={2.5} /></button>
+              <button 
+                className="btn-round modal-btn-volume" 
+                onClick={handleToggleMute} 
+                title={isMuted ? "Unmute" : "Mute"}
+                style={{ marginLeft: 'auto' }}
+              >
+                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+              </button>
             </div>
           </div>
         </div>

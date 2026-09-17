@@ -1,7 +1,16 @@
-import { Play, Plus, ThumbsUp, ChevronDown } from 'lucide-react';
+import { Play, Plus, Check, ThumbsUp, ChevronDown } from 'lucide-react';
 import '../styles/figma-ui.css';
 
-export default function CarouselRow({ title, videos, isTop10, isContinueWatching, onPlay, onMoreInfo }) {
+export default function CarouselRow({ 
+  title, 
+  videos, 
+  isTop10, 
+  isContinueWatching, 
+  onPlay, 
+  onMoreInfo,
+  myList = [],
+  onToggleMyList
+}) {
   if (!videos || videos.length === 0) return null;
 
   return (
@@ -10,7 +19,9 @@ export default function CarouselRow({ title, videos, isTop10, isContinueWatching
       
       <div className="carousel-container">
         {videos.map((video, index) => {
-          const displayTitle = video.publicId.split('/').pop().replace(/-/g, ' ');
+          const rawTitle = video.publicId.split('/').pop().replace(/-/g, ' ').replace(/_/g, ' ');
+          const displayTitle = rawTitle.toLowerCase().startsWith('img') ? 'Diwali Diaries' : rawTitle;
+          const isBookmarked = myList.some(item => item.publicId === video.publicId);
           
           return (
             <div className="carousel-card" key={`${video.publicId}-${index}`} onClick={() => onMoreInfo(video)}>
@@ -37,12 +48,18 @@ export default function CarouselRow({ title, videos, isTop10, isContinueWatching
                 )}
                 <div className="hover-info-content">
                   <div className="hover-actions">
-                    <button className="hover-btn play" onClick={(e) => { e.stopPropagation(); onPlay(video); }}>
+                    <button className="hover-btn play" onClick={(e) => { e.stopPropagation(); onPlay(video); }} title="Play">
                       <Play size={16} fill="black" />
                     </button>
-                    <button className="hover-btn"><Plus size={18} /></button>
-                    <button className="hover-btn"><ThumbsUp size={16} /></button>
-                    <button className="hover-btn" style={{ marginLeft: 'auto' }} onClick={(e) => { e.stopPropagation(); onMoreInfo(video); }}>
+                    <button 
+                      className="hover-btn" 
+                      onClick={(e) => { e.stopPropagation(); onToggleMyList?.(video); }}
+                      title={isBookmarked ? "Remove from My List" : "Add to My List"}
+                    >
+                      {isBookmarked ? <Check size={16} color="#46d369" /> : <Plus size={18} />}
+                    </button>
+                    <button className="hover-btn" title="Like"><ThumbsUp size={16} /></button>
+                    <button className="hover-btn" style={{ marginLeft: 'auto' }} onClick={(e) => { e.stopPropagation(); onMoreInfo(video); }} title="More Info">
                       <ChevronDown size={18} />
                     </button>
                   </div>
