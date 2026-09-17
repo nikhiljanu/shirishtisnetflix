@@ -1,12 +1,28 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Play, Info, Volume2, VolumeX } from 'lucide-react';
+import { fetchPlaybackUrl } from '../config/api';
+import { useAutoPreviewVideo } from '../hooks/useAutoPreviewVideo';
 import '../styles/figma-ui.css';
 
 export default function HeroBillboard({ video, onPlay, onMoreInfo }) {
-  if (!video) return null;
-  
   const [isMuted, setIsMuted] = useState(true);
+  const [playbackUrl, setPlaybackUrl] = useState(null);
   const videoRef = useRef(null);
+
+  useAutoPreviewVideo(videoRef, playbackUrl, { maxPlayMs: 15000 });
+
+  useEffect(() => {
+    if (!video) return;
+    let cancelled = false;
+    setPlaybackUrl(null);
+    fetchPlaybackUrl(video.publicId).then((data) => {
+      if (!cancelled) setPlaybackUrl(data.secureUrl);
+    });
+    return () => { cancelled = true; };
+  }, [video?.publicId]);
+
+  if (!video) return null;
+
   const title = video.publicId.split('/').pop().replace(/-/g, ' ');
 
   const handleToggleMute = (e) => {
@@ -21,15 +37,15 @@ export default function HeroBillboard({ video, onPlay, onMoreInfo }) {
     <div className="hero-container">
       <div className="hero-card">
         {/* Background Video Media with Fallback Poster */}
-        {video.secureUrl ? (
-          <video 
+        {playbackUrl ? (
+          <video
             ref={videoRef}
-            src={video.secureUrl} 
+            src={playbackUrl}
             poster={video.thumbnailUrl}
-            autoPlay 
+            autoPlay
             muted={isMuted}
             loop
-            playsInline 
+            playsInline
             className="hero-media"
           />
         ) : (

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Flag, Pause, Play, RotateCcw, RotateCw, Volume2, VolumeX, SkipForward, ListVideo, Subtitles, Settings, Maximize } from 'lucide-react';
+import { fetchPlaybackUrl } from '../config/api';
 import '../styles/figma-ui.css';
 
 export default function CinematicPlayer({ video, onClose }) {
@@ -7,11 +8,21 @@ export default function CinematicPlayer({ video, onClose }) {
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isIdle, setIsIdle] = useState(false);
-  
+  const [playbackUrl, setPlaybackUrl] = useState(null);
+
   const videoRef = useRef(null);
   const idleTimerRef = useRef(null);
 
   const displayTitle = video?.publicId.split('/').pop().replace(/-/g, ' ');
+
+  useEffect(() => {
+    let cancelled = false;
+    setPlaybackUrl(null);
+    fetchPlaybackUrl(video.publicId).then((data) => {
+      if (!cancelled) setPlaybackUrl(data.secureUrl);
+    });
+    return () => { cancelled = true; };
+  }, [video.publicId]);
 
   useEffect(() => {
     const handleMouseMove = () => {
@@ -75,16 +86,22 @@ export default function CinematicPlayer({ video, onClose }) {
 
   return (
     <div className={`player-container ${isIdle && isPlaying ? 'idle' : ''}`}>
-      <video 
-        ref={videoRef}
-        src={video.secureUrl} 
-        className="player-video" 
-        autoPlay 
-        playsInline 
-        onTimeUpdate={handleTimeUpdate}
-        onEnded={() => setIsPlaying(false)}
-      />
-      
+      {playbackUrl ? (
+        <video
+          ref={videoRef}
+          src={playbackUrl}
+          className="player-video"
+          autoPlay
+          playsInline
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={() => setIsPlaying(false)}
+        />
+      ) : (
+        <div className="player-video" style={{ display: 'grid', placeItems: 'center', background: '#000', color: 'white' }}>
+          Loading...
+        </div>
+      )}
+
       <div className="player-overlay">
         <div className="player-top-bar">
           <button className="player-back-btn" onClick={onClose}>

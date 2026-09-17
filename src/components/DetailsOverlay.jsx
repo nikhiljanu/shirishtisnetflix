@@ -1,12 +1,28 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Play, Plus, Check, ThumbsUp, X, Volume2, VolumeX } from 'lucide-react';
+import { fetchPlaybackUrl } from '../config/api';
+import { useAutoPreviewVideo } from '../hooks/useAutoPreviewVideo';
 import '../styles/figma-ui.css';
 
 export default function DetailsOverlay({ video, allVideos, onClose, onPlay, myList = [], onToggleMyList }) {
+  const [isMuted, setIsMuted] = useState(true);
+  const [playbackUrl, setPlaybackUrl] = useState(null);
+  const videoRef = useRef(null);
+
+  useAutoPreviewVideo(videoRef, playbackUrl, { maxPlayMs: 15000 });
+
+  useEffect(() => {
+    if (!video) return;
+    let cancelled = false;
+    setPlaybackUrl(null);
+    fetchPlaybackUrl(video.publicId).then((data) => {
+      if (!cancelled) setPlaybackUrl(data.secureUrl);
+    });
+    return () => { cancelled = true; };
+  }, [video?.publicId]);
+
   if (!video) return null;
 
-  const [isMuted, setIsMuted] = useState(true);
-  const videoRef = useRef(null);
   const rawTitle = video.publicId.split('/').pop().replace(/-/g, ' ').replace(/_/g, ' ');
   const displayTitle = rawTitle.toLowerCase().startsWith('img') ? 'Diwali Diaries' : rawTitle;
   const isBookmarked = myList.some(item => item.publicId === video.publicId);
@@ -30,17 +46,16 @@ export default function DetailsOverlay({ video, allVideos, onClose, onPlay, myLi
         </button>
 
         <div className="modal-banner">
-          {video.secureUrl ? (
-            <video 
+          {playbackUrl ? (
+            <video
               ref={videoRef}
-              src={video.secureUrl} 
+              src={playbackUrl}
               poster={video.thumbnailUrl}
-              autoPlay 
+              autoPlay
               muted={isMuted}
               loop
-              playsInline 
+              playsInline
               className="modal-banner-media"
-
             />
           ) : (
             <img src={video.thumbnailUrl} alt={displayTitle} className="modal-banner-media" />
