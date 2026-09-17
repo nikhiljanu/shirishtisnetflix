@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 import { healthRouter } from './routes/health.routes.js';
+import { mediaRouter } from './routes/media.routes.js';
 import { videoRouter } from './routes/video.routes.js';
 
 export const app = express();
@@ -28,6 +29,7 @@ app.use(rateLimit({
 }));
 
 app.use('/api/health', healthRouter);
+app.use('/api/media', mediaRouter);
 app.use('/api/videos', videoRouter);
 
 app.use(notFoundHandler);
