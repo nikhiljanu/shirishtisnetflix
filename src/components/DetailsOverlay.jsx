@@ -15,9 +15,13 @@ export default function DetailsOverlay({ video, allVideos, onClose, onPlay, myLi
     if (!video) return;
     let cancelled = false;
     setPlaybackUrl(null);
-    fetchPlaybackUrl(video.publicId).then((data) => {
-      if (!cancelled) setPlaybackUrl(data.secureUrl);
-    });
+    fetchPlaybackUrl(video.publicId)
+      .then((data) => {
+        if (!cancelled) setPlaybackUrl(data.secureUrl);
+      })
+      .catch((error) => {
+        if (!cancelled) console.error('Modal preview playback URL failed:', error);
+      });
     return () => { cancelled = true; };
   }, [video?.publicId]);
 

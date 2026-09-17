@@ -9,6 +9,7 @@ export default function CinematicPlayer({ video, onClose }) {
   const [progress, setProgress] = useState(0);
   const [isIdle, setIsIdle] = useState(false);
   const [playbackUrl, setPlaybackUrl] = useState(null);
+  const [playbackError, setPlaybackError] = useState(null);
 
   const videoRef = useRef(null);
   const idleTimerRef = useRef(null);
@@ -18,9 +19,14 @@ export default function CinematicPlayer({ video, onClose }) {
   useEffect(() => {
     let cancelled = false;
     setPlaybackUrl(null);
-    fetchPlaybackUrl(video.publicId).then((data) => {
-      if (!cancelled) setPlaybackUrl(data.secureUrl);
-    });
+    setPlaybackError(null);
+    fetchPlaybackUrl(video.publicId)
+      .then((data) => {
+        if (!cancelled) setPlaybackUrl(data.secureUrl);
+      })
+      .catch((error) => {
+        if (!cancelled) setPlaybackError(error.message || 'Unable to load video');
+      });
     return () => { cancelled = true; };
   }, [video.publicId]);
 
@@ -96,6 +102,21 @@ export default function CinematicPlayer({ video, onClose }) {
           onTimeUpdate={handleTimeUpdate}
           onEnded={() => setIsPlaying(false)}
         />
+      ) : playbackError ? (
+        <div className="player-video" style={{ display: 'grid', placeItems: 'center', gap: '1rem', background: '#000', color: 'white' }}>
+          <span>{playbackError}</span>
+          <button
+            onClick={() => {
+              setPlaybackError(null);
+              fetchPlaybackUrl(video.publicId)
+                .then((data) => setPlaybackUrl(data.secureUrl))
+                .catch((error) => setPlaybackError(error.message || 'Unable to load video'));
+            }}
+            style={{ padding: '10px 20px', background: 'white', color: 'black', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+          >
+            Retry
+          </button>
+        </div>
       ) : (
         <div className="player-video" style={{ display: 'grid', placeItems: 'center', background: '#000', color: 'white' }}>
           Loading...

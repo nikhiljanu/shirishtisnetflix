@@ -15,9 +15,13 @@ export default function HeroBillboard({ video, onPlay, onMoreInfo }) {
     if (!video) return;
     let cancelled = false;
     setPlaybackUrl(null);
-    fetchPlaybackUrl(video.publicId).then((data) => {
-      if (!cancelled) setPlaybackUrl(data.secureUrl);
-    });
+    fetchPlaybackUrl(video.publicId)
+      .then((data) => {
+        if (!cancelled) setPlaybackUrl(data.secureUrl);
+      })
+      .catch((error) => {
+        if (!cancelled) console.error('Hero preview playback URL failed:', error);
+      });
     return () => { cancelled = true; };
   }, [video?.publicId]);
 
