@@ -37,6 +37,7 @@ export default function DetailsOverlay({ video, allVideos, onClose, onPlay, myLi
               poster={video.thumbnailUrl}
               autoPlay 
               muted={isMuted}
+              loop
               playsInline 
               className="modal-banner-media"
 

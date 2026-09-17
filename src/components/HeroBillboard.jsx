@@ -28,13 +28,9 @@ export default function HeroBillboard({ video, onPlay, onMoreInfo }) {
             poster={video.thumbnailUrl}
             autoPlay 
             muted={isMuted}
+            loop
             playsInline 
             className="hero-media"
-            onEnded={() => {
-              if (videoRef.current) {
-                // Keep it on the last frame or let it stop
-              }
-            }}
           />
         ) : (
           <img 

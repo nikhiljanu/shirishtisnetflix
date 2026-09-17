@@ -8,7 +8,7 @@ function ensureConfigured() {
   }
 }
 
-function toVideoResponse(resource, baseUrl) {
+function toVideoResponse(resource) {
   return {
     publicId: resource.public_id,
     format: resource.format,
@@ -18,13 +18,27 @@ function toVideoResponse(resource, baseUrl) {
     height: resource.height,
     bytes: resource.bytes,
     createdAt: resource.created_at,
-    secureUrl: `${baseUrl}/api/media?type=video&id=${encodeURIComponent(resource.public_id)}&fmt=${resource.format}`,
-    thumbnailUrl: `${baseUrl}/api/media?type=image&id=${encodeURIComponent(resource.public_id)}`,
+    secureUrl: cloudinary.url(resource.public_id, {
+      resource_type: 'video',
+      type: 'upload',
+      quality: 'auto',
+      fetch_format: 'auto',
+      secure: true,
+      sign_url: true
+    }),
+    thumbnailUrl: cloudinary.url(resource.public_id, {
+      resource_type: 'video',
+      type: 'upload',
+      format: 'jpg',
+      secure: true,
+      transformation: [{ width: 640, crop: 'scale' }],
+      sign_url: true
+    }),
   };
 }
 
 
-export async function listCloudinaryVideos({ cursor, limit, baseUrl }) {
+export async function listCloudinaryVideos({ cursor, limit }) {
   ensureConfigured();
   const result = await cloudinary.api.resources({
     resource_type: 'video',
@@ -34,16 +48,16 @@ export async function listCloudinaryVideos({ cursor, limit, baseUrl }) {
   });
 
   return {
-    data: result.resources.map(res => toVideoResponse(res, baseUrl)),
+    data: result.resources.map(toVideoResponse),
     nextCursor: result.next_cursor || null,
   };
 }
 
-export async function getCloudinaryVideo(publicId, baseUrl) {
+export async function getCloudinaryVideo(publicId) {
   ensureConfigured();
   const resource = await cloudinary.api.resource(publicId, {
     resource_type: 'video',
     type: 'upload',
   });
-  return toVideoResponse(resource, baseUrl);
+  return toVideoResponse(resource);
 }
